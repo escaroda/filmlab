@@ -1,0 +1,5 @@
+{
+  "name": "FilmLab",
+  "description": "A film simulation app that applies molecular-level grain structure and color grading to images.",
+  "requestFramePermissions": []
+}
