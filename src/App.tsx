@@ -180,37 +180,38 @@ export default function App() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#0a0a0a] text-gray-200 flex flex-col font-sans">
-      <header className="border-b border-white/10 bg-[#141414] px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Camera className="w-6 h-6 text-yellow-500" />
-          <h1 className="text-xl font-medium tracking-tight text-white">Film<span className="text-gray-500">Lab</span></h1>
+      <header className="border-b border-white/10 bg-[#141414] px-4 py-3 md:px-6 md:py-4 flex items-center justify-between flex-wrap gap-2 z-30">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Camera className="w-5 h-5 md:w-6 md:h-6 text-yellow-500" />
+          <h1 className="text-lg md:text-xl font-medium tracking-tight text-white">Film<span className="text-gray-500">Lab</span></h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium transition-colors"
+            className="flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs md:text-sm font-medium transition-colors"
           >
-            <Upload className="w-4 h-4" />
-            Open Image
+            <Upload className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <span className="hidden sm:inline">Open Image</span>
+            <span className="sm:hidden">Open</span>
           </button>
           
-          <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1">
+          <div className="flex items-center gap-1 md:gap-2 bg-white/5 rounded-lg p-1">
             <select 
               value={exportFormat}
               onChange={(e) => setExportFormat(e.target.value)}
-              className="bg-transparent text-sm font-medium px-2 py-1 outline-none cursor-pointer"
+              className="bg-transparent text-xs md:text-sm font-medium px-1 md:px-2 py-1 outline-none cursor-pointer max-w-[70px] md:max-w-none"
             >
-              <option value="image/png" className="bg-[#141414]">PNG (Lossless)</option>
+              <option value="image/png" className="bg-[#141414]">PNG</option>
               <option value="image/avif" className="bg-[#141414]">AVIF</option>
               <option value="image/jpeg" className="bg-[#141414]">JPG</option>
             </select>
             <button 
               onClick={handleDownload}
               disabled={!image}
-              className="flex items-center gap-2 px-4 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-1.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-md text-xs md:text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Download className="w-4 h-4" />
-              Export
+              <Download className="w-3.5 h-3.5 md:w-4 md:h-4" />
+              <span className="hidden sm:inline">Export</span>
             </button>
           </div>
         </div>
@@ -223,8 +224,8 @@ export default function App() {
         />
       </header>
 
-      <main className="flex-1 flex overflow-hidden">
-        <div className="flex-1 relative bg-[#050505] flex items-center justify-center p-8 overflow-hidden">
+      <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
+        <div className="flex-1 relative bg-[#050505] flex items-center justify-center p-4 md:p-8 overflow-hidden min-h-[40vh] md:min-h-0">
           {!image ? (
             <div className="flex flex-col items-center justify-center text-gray-500 gap-4">
               <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
@@ -278,26 +279,26 @@ export default function App() {
 
               {/* Zoom Controls */}
               <div 
-                className="absolute top-4 right-4 flex items-center gap-1 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg p-1 z-10"
+                className="absolute top-2 right-2 md:top-4 md:right-4 flex items-center gap-1 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg p-1 z-10"
                 onPointerDown={(e) => e.stopPropagation()}
                 onDoubleClick={(e) => e.stopPropagation()}
               >
-                <button onClick={resetZoom} className="px-2 py-1.5 text-xs font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded transition-colors">Fit</button>
-                <button onClick={handleZoom100} className="px-2 py-1.5 text-xs font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded transition-colors">1:1</button>
+                <button onClick={resetZoom} className="px-2 py-1.5 text-[10px] md:text-xs font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded transition-colors">Fit</button>
+                <button onClick={handleZoom100} className="px-2 py-1.5 text-[10px] md:text-xs font-medium text-gray-300 hover:text-white hover:bg-white/10 rounded transition-colors">1:1</button>
                 <div className="w-px h-4 bg-white/10 mx-1" />
                 <button 
                   onPointerDown={(e) => { e.stopPropagation(); startZoom(-0.05); }}
                   onPointerUp={stopZoom}
                   onPointerLeave={stopZoom}
-                  className="p-1.5 hover:bg-white/10 rounded text-gray-300 hover:text-white transition-colors"
-                ><Minus className="w-4 h-4" /></button>
-                <span className="px-2 text-xs font-mono text-gray-300 min-w-[3rem] text-center">{Math.round(zoom * 100)}%</span>
+                  className="p-1 md:p-1.5 hover:bg-white/10 rounded text-gray-300 hover:text-white transition-colors"
+                ><Minus className="w-3.5 h-3.5 md:w-4 md:h-4" /></button>
+                <span className="px-1 md:px-2 text-[10px] md:text-xs font-mono text-gray-300 min-w-[2.5rem] md:min-w-[3rem] text-center">{Math.round(zoom * 100)}%</span>
                 <button 
                   onPointerDown={(e) => { e.stopPropagation(); startZoom(0.05); }}
                   onPointerUp={stopZoom}
                   onPointerLeave={stopZoom}
-                  className="p-1.5 hover:bg-white/10 rounded text-gray-300 hover:text-white transition-colors"
-                ><Plus className="w-4 h-4" /></button>
+                  className="p-1 md:p-1.5 hover:bg-white/10 rounded text-gray-300 hover:text-white transition-colors"
+                ><Plus className="w-3.5 h-3.5 md:w-4 md:h-4" /></button>
               </div>
               
               <button
@@ -305,16 +306,17 @@ export default function App() {
                 onPointerUp={(e) => { e.stopPropagation(); setShowOriginal(false); }}
                 onPointerLeave={(e) => { e.stopPropagation(); setShowOriginal(false); }}
                 onDoubleClick={(e) => e.stopPropagation()}
-                className="absolute bottom-8 right-8 flex items-center gap-2 px-4 py-2 bg-black/80 backdrop-blur-md border border-white/10 hover:bg-black rounded-full text-sm font-medium transition-colors select-none z-10"
+                className="absolute bottom-4 right-4 md:bottom-8 md:right-8 flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-black/80 backdrop-blur-md border border-white/10 hover:bg-black rounded-full text-xs md:text-sm font-medium transition-colors select-none z-10"
               >
-                <Eye className="w-4 h-4" />
-                Hold to Compare
+                <Eye className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                <span className="hidden sm:inline">Hold to Compare</span>
+                <span className="sm:hidden">Compare</span>
               </button>
             </div>
           )}
         </div>
 
-        <aside className="w-80 border-l border-white/10 bg-[#141414] overflow-y-auto flex flex-col custom-scrollbar">
+        <aside className="w-full md:w-80 h-[45vh] md:h-full border-t md:border-t-0 md:border-l border-white/10 bg-[#141414] overflow-y-auto flex flex-col custom-scrollbar shrink-0 z-20">
           <div className="p-5 border-b border-white/10">
             <h2 className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
               <SlidersHorizontal className="w-3 h-3" />
