@@ -18,6 +18,7 @@ const fragmentShaderSource = `
   uniform int u_film_type;
   uniform float u_grain_amount;
   uniform float u_grain_size;
+  uniform float u_normalize_grain;
   uniform float u_time;
   uniform float u_contrast;
   
@@ -144,7 +145,7 @@ const fragmentShaderSource = `
       rgb = hsv2rgb(hsv);
 
       // 3. Halation (Red glow around highlights)
-      if (u_halation > 0.0 && u_film_type != 2 && u_film_type != 3 && u_film_type != 8) {
+      if (u_halation > 0.0 && u_film_type != 2 && u_film_type != 3 && u_film_type != 8 && u_film_type != 13) {
           vec2 texel = 1.0 / u_resolution;
           vec3 hBlur = vec3(0.0);
           float totalWeight = 0.0;
@@ -235,10 +236,43 @@ const fragmentShaderSource = `
           rgb = mix(vec3(lum), rgb, 1.25);
           rgb.r = smoothstep(0.0, 0.95, rgb.r);
           rgb.b = smoothstep(0.0, 0.95, rgb.b);
+      } else if (u_film_type == 10) {
+          // Fuji Provia 100F (Neutral, realistic, slightly cool shadows)
+          rgb = adjustContrast(rgb, 1.05);
+          rgb.b = smoothstep(0.0, 0.98, rgb.b) * 1.02;
+          rgb = mix(rgb, vec3(0.95, 0.98, 1.0) * rgb, 0.1);
+      } else if (u_film_type == 11) {
+          // Polaroid 600 (Faded, vintage, shifted colors, lifted blacks)
+          rgb = adjustContrast(rgb, 0.9);
+          rgb.r = mix(0.05, 0.95, rgb.r);
+          rgb.g = mix(0.02, 0.9, rgb.g);
+          rgb.b = mix(0.1, 0.85, rgb.b);
+          rgb = mix(rgb, vec3(1.0, 0.95, 0.8) * rgb, 0.15); // Warm vintage tint
+      } else if (u_film_type == 12) {
+          // Kodak Aerochrome (Color Infrared, turns greens into red/pink)
+          float greenness = rgb.g - max(rgb.r, rgb.b);
+          if (greenness > 0.0) {
+              rgb.r = min(1.0, rgb.r + greenness * 1.5);
+              rgb.b = min(1.0, rgb.b + greenness * 0.5);
+              rgb.g = max(0.0, rgb.g - greenness * 0.8);
+          }
+          rgb = adjustContrast(rgb, 1.15);
+      } else if (u_film_type == 13) {
+          // Ilford Ortho Plus (Orthochromatic B&W, insensitive to red, darkens reds)
+          float lum = dot(rgb, vec3(0.05, 0.75, 0.20));
+          lum = smoothstep(0.05, 0.95, lum);
+          rgb = vec3(lum);
       }
 
       // 6. Grain
-      vec2 pos = v_texcoord * u_resolution / u_grain_size;
+      // Make grain size consistent regardless of image resolution by normalizing to a 1000px reference
+      vec2 pos;
+      if (u_normalize_grain > 0.5) {
+          float minRes = min(u_resolution.x, u_resolution.y);
+          pos = v_texcoord * (u_resolution / minRes) * 1000.0 / u_grain_size;
+      } else {
+          pos = v_texcoord * u_resolution / u_grain_size;
+      }
       float g = filmGrain(pos, u_time);
 
       float finalLuma = dot(rgb, vec3(0.299, 0.587, 0.114));
@@ -313,6 +347,7 @@ interface WebGLCanvasProps {
   // Grain
   grainAmount: number;
   grainSize: number;
+  normalizeGrain: boolean;
   
   // Effects
   showOriginal: boolean;
@@ -336,6 +371,7 @@ export const WebGLCanvas: React.FC<WebGLCanvasProps> = ({
   colorRange,
   grainAmount,
   grainSize,
+  normalizeGrain,
   showOriginal,
   halation,
   vignette,
@@ -506,6 +542,7 @@ export const WebGLCanvas: React.FC<WebGLCanvasProps> = ({
     // Grain
     gl.uniform1f(gl.getUniformLocation(program, "u_grain_amount"), grainAmount);
     gl.uniform1f(gl.getUniformLocation(program, "u_grain_size"), grainSize);
+    gl.uniform1f(gl.getUniformLocation(program, "u_normalize_grain"), normalizeGrain ? 1.0 : 0.0);
 
     // Effects
     gl.uniform1i(gl.getUniformLocation(program, "u_show_original"), showOriginal ? 1 : 0);
@@ -516,7 +553,7 @@ export const WebGLCanvas: React.FC<WebGLCanvasProps> = ({
   }, [
     image, filmType, exposure, contrast, highlights, shadows, 
     temperature, tint, saturation, vibrance, targetHue, colorRange,
-    grainAmount, grainSize, halation, vignette, 
+    grainAmount, grainSize, normalizeGrain, halation, vignette, 
     showOriginal, windowSize, canvasRef
   ]);
 

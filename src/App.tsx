@@ -15,34 +15,69 @@ const FILMS = [
   { id: 9, name: 'Ektar 100', type: 'Color Negative', color: 'bg-orange-500' },
   { id: 4, name: 'Cinestill 800T', type: 'Motion Picture', color: 'bg-blue-500' },
   { id: 5, name: 'Velvia 50', type: 'Color Reversal', color: 'bg-emerald-500' },
+  { id: 10, name: 'Provia 100F', type: 'Color Reversal', color: 'bg-emerald-400' },
+  { id: 11, name: 'Polaroid 600', type: 'Instant Film', color: 'bg-pink-400' },
+  { id: 12, name: 'Aerochrome', type: 'Color Infrared', color: 'bg-rose-500' },
   { id: 2, name: 'HP5 Plus', type: 'Black & White', color: 'bg-gray-400' },
   { id: 3, name: 'Tri-X 400', type: 'Black & White', color: 'bg-gray-300' },
   { id: 8, name: 'Delta 3200', type: 'Black & White', color: 'bg-gray-500' },
+  { id: 13, name: 'Ortho Plus', type: 'Black & White', color: 'bg-gray-600' },
 ];
+
+const APP_DEFAULTS = {
+  filmType: 0,
+  exposure: 0,
+  contrast: 1.1,
+  highlights: 0,
+  shadows: 0,
+  temperature: 0,
+  tint: 0,
+  saturation: 0,
+  vibrance: 0,
+  targetHue: 0,
+  colorRange: 1.0,
+  grainAmount: 0.15,
+  grainSize: 1.5,
+  normalizeGrain: true,
+  halation: 0.2,
+  vignette: 0.3,
+};
+
+const loadInitialState = (key: keyof typeof APP_DEFAULTS) => {
+  try {
+    const saved = localStorage.getItem('filmlab_defaults');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed[key] !== undefined) return parsed[key];
+    }
+  } catch (e) {}
+  return APP_DEFAULTS[key];
+};
 
 export default function App() {
   const [image, setImage] = useState<HTMLImageElement | null>(null);
-  const [filmType, setFilmType] = useState(0);
+  const [filmType, setFilmType] = useState(() => loadInitialState('filmType'));
   
   // Light
-  const [exposure, setExposure] = useState(0);
-  const [contrast, setContrast] = useState(1.1);
-  const [highlights, setHighlights] = useState(0);
-  const [shadows, setShadows] = useState(0);
+  const [exposure, setExposure] = useState(() => loadInitialState('exposure'));
+  const [contrast, setContrast] = useState(() => loadInitialState('contrast'));
+  const [highlights, setHighlights] = useState(() => loadInitialState('highlights'));
+  const [shadows, setShadows] = useState(() => loadInitialState('shadows'));
   
   // Color
-  const [temperature, setTemperature] = useState(0);
-  const [tint, setTint] = useState(0);
-  const [saturation, setSaturation] = useState(0);
-  const [vibrance, setVibrance] = useState(0);
-  const [targetHue, setTargetHue] = useState(0);
-  const [colorRange, setColorRange] = useState(1.0);
+  const [temperature, setTemperature] = useState(() => loadInitialState('temperature'));
+  const [tint, setTint] = useState(() => loadInitialState('tint'));
+  const [saturation, setSaturation] = useState(() => loadInitialState('saturation'));
+  const [vibrance, setVibrance] = useState(() => loadInitialState('vibrance'));
+  const [targetHue, setTargetHue] = useState(() => loadInitialState('targetHue'));
+  const [colorRange, setColorRange] = useState(() => loadInitialState('colorRange'));
   
   // Grain & Effects
-  const [grainAmount, setGrainAmount] = useState(0.15);
-  const [grainSize, setGrainSize] = useState(1.5);
-  const [halation, setHalation] = useState(0.2);
-  const [vignette, setVignette] = useState(0.3);
+  const [grainAmount, setGrainAmount] = useState(() => loadInitialState('grainAmount'));
+  const [grainSize, setGrainSize] = useState(() => loadInitialState('grainSize'));
+  const [normalizeGrain, setNormalizeGrain] = useState(() => loadInitialState('normalizeGrain'));
+  const [halation, setHalation] = useState(() => loadInitialState('halation'));
+  const [vignette, setVignette] = useState(() => loadInitialState('vignette'));
   
   const [showOriginal, setShowOriginal] = useState(false);
   const [exportFormat, setExportFormat] = useState('image/jpeg');
@@ -178,6 +213,36 @@ export default function App() {
     link.click();
   };
 
+  const handleSaveDefaults = () => {
+    const currentSettings = {
+      filmType, exposure, contrast, highlights, shadows,
+      temperature, tint, saturation, vibrance, targetHue, colorRange,
+      grainAmount, grainSize, normalizeGrain, halation, vignette
+    };
+    localStorage.setItem('filmlab_defaults', JSON.stringify(currentSettings));
+    alert('Current settings saved as default!');
+  };
+
+  const handleResetAppDefaults = () => {
+    localStorage.removeItem('filmlab_defaults');
+    setFilmType(APP_DEFAULTS.filmType);
+    setExposure(APP_DEFAULTS.exposure);
+    setContrast(APP_DEFAULTS.contrast);
+    setHighlights(APP_DEFAULTS.highlights);
+    setShadows(APP_DEFAULTS.shadows);
+    setTemperature(APP_DEFAULTS.temperature);
+    setTint(APP_DEFAULTS.tint);
+    setSaturation(APP_DEFAULTS.saturation);
+    setVibrance(APP_DEFAULTS.vibrance);
+    setTargetHue(APP_DEFAULTS.targetHue);
+    setColorRange(APP_DEFAULTS.colorRange);
+    setGrainAmount(APP_DEFAULTS.grainAmount);
+    setGrainSize(APP_DEFAULTS.grainSize);
+    setNormalizeGrain(APP_DEFAULTS.normalizeGrain);
+    setHalation(APP_DEFAULTS.halation);
+    setVignette(APP_DEFAULTS.vignette);
+  };
+
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#0a0a0a] text-gray-200 flex flex-col font-sans">
       <header className="border-b border-white/10 bg-[#141414] px-4 py-3 md:px-6 md:py-4 flex items-center justify-between flex-wrap gap-2 z-30">
@@ -270,6 +335,7 @@ export default function App() {
                   colorRange={colorRange}
                   grainAmount={grainAmount}
                   grainSize={grainSize}
+                  normalizeGrain={normalizeGrain}
                   showOriginal={showOriginal}
                   halation={halation}
                   vignette={vignette}
@@ -353,7 +419,7 @@ export default function App() {
                   <label className="text-xs text-gray-400">Exposure</label>
                   <span className="text-xs font-mono text-gray-500">{exposure > 0 ? '+' : ''}{exposure.toFixed(2)}</span>
                 </div>
-                <input type="range" min="-2.0" max="2.0" step={isShiftPressed ? 0.01 : 0.05} value={exposure} onChange={(e) => setExposure(parseFloat(e.target.value))} onDoubleClick={() => setExposure(0)} className="w-full accent-yellow-500" />
+                <input type="range" min="-2.0" max="2.0" step={isShiftPressed ? 0.01 : 0.05} value={exposure} onChange={(e) => setExposure(parseFloat(e.target.value))} onDoubleClick={() => setExposure(APP_DEFAULTS.exposure)} className="w-full accent-yellow-500" />
               </div>
 
               <div>
@@ -361,21 +427,23 @@ export default function App() {
                   <label className="text-xs text-gray-400">Contrast</label>
                   <span className="text-xs font-mono text-gray-500">{contrast.toFixed(2)}</span>
                 </div>
-                <input type="range" min="0.8" max="1.5" step={isShiftPressed ? 0.002 : 0.01} value={contrast} onChange={(e) => setContrast(parseFloat(e.target.value))} onDoubleClick={() => setContrast(1.1)} className="w-full accent-yellow-500" />
+                <input type="range" min="0.8" max="1.5" step={isShiftPressed ? 0.002 : 0.01} value={contrast} onChange={(e) => setContrast(parseFloat(e.target.value))} onDoubleClick={() => setContrast(APP_DEFAULTS.contrast)} className="w-full accent-yellow-500" />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div>
                   <div className="flex justify-between mb-1">
                     <label className="text-xs text-gray-400">Highlights</label>
+                    <span className="text-xs font-mono text-gray-500">{highlights > 0 ? '+' : ''}{highlights.toFixed(2)}</span>
                   </div>
-                  <input type="range" min="-1.0" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={highlights} onChange={(e) => setHighlights(parseFloat(e.target.value))} onDoubleClick={() => setHighlights(0)} className="w-full accent-yellow-500" />
+                  <input type="range" min="-1.0" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={highlights} onChange={(e) => setHighlights(parseFloat(e.target.value))} onDoubleClick={() => setHighlights(APP_DEFAULTS.highlights)} className="w-full accent-yellow-500" />
                 </div>
                 <div>
                   <div className="flex justify-between mb-1">
                     <label className="text-xs text-gray-400">Shadows</label>
+                    <span className="text-xs font-mono text-gray-500">{shadows > 0 ? '+' : ''}{shadows.toFixed(2)}</span>
                   </div>
-                  <input type="range" min="-1.0" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={shadows} onChange={(e) => setShadows(parseFloat(e.target.value))} onDoubleClick={() => setShadows(0)} className="w-full accent-yellow-500" />
+                  <input type="range" min="-1.0" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={shadows} onChange={(e) => setShadows(parseFloat(e.target.value))} onDoubleClick={() => setShadows(APP_DEFAULTS.shadows)} className="w-full accent-yellow-500" />
                 </div>
               </div>
             </div>
@@ -389,7 +457,7 @@ export default function App() {
                   <label className="text-xs text-gray-400">Temperature</label>
                   <span className="text-xs font-mono text-gray-500">{temperature > 0 ? '+' : ''}{temperature.toFixed(2)}</span>
                 </div>
-                <input type="range" min="-1.0" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={temperature} onChange={(e) => setTemperature(parseFloat(e.target.value))} onDoubleClick={() => setTemperature(0)} className="w-full accent-yellow-500" />
+                <input type="range" min="-1.0" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={temperature} onChange={(e) => setTemperature(parseFloat(e.target.value))} onDoubleClick={() => setTemperature(APP_DEFAULTS.temperature)} className="w-full accent-yellow-500" />
               </div>
 
               <div>
@@ -397,7 +465,7 @@ export default function App() {
                   <label className="text-xs text-gray-400">Tint</label>
                   <span className="text-xs font-mono text-gray-500">{tint > 0 ? '+' : ''}{tint.toFixed(2)}</span>
                 </div>
-                <input type="range" min="-1.0" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={tint} onChange={(e) => setTint(parseFloat(e.target.value))} onDoubleClick={() => setTint(0)} className="w-full accent-yellow-500" />
+                <input type="range" min="-1.0" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={tint} onChange={(e) => setTint(parseFloat(e.target.value))} onDoubleClick={() => setTint(APP_DEFAULTS.tint)} className="w-full accent-yellow-500" />
               </div>
 
               <div>
@@ -405,7 +473,7 @@ export default function App() {
                   <label className="text-xs text-gray-400">Vibrance</label>
                   <span className="text-xs font-mono text-gray-500">{vibrance > 0 ? '+' : ''}{vibrance.toFixed(2)}</span>
                 </div>
-                <input type="range" min="-1.0" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={vibrance} onChange={(e) => setVibrance(parseFloat(e.target.value))} onDoubleClick={() => setVibrance(0)} className="w-full accent-yellow-500" />
+                <input type="range" min="-1.0" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={vibrance} onChange={(e) => setVibrance(parseFloat(e.target.value))} onDoubleClick={() => setVibrance(APP_DEFAULTS.vibrance)} className="w-full accent-yellow-500" />
               </div>
 
               <div>
@@ -413,7 +481,7 @@ export default function App() {
                   <label className="text-xs text-gray-400">Saturation</label>
                   <span className="text-xs font-mono text-gray-500">{saturation > 0 ? '+' : ''}{saturation.toFixed(2)}</span>
                 </div>
-                <input type="range" min="-1.0" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={saturation} onChange={(e) => setSaturation(parseFloat(e.target.value))} onDoubleClick={() => setSaturation(0)} className="w-full accent-yellow-500" />
+                <input type="range" min="-1.0" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={saturation} onChange={(e) => setSaturation(parseFloat(e.target.value))} onDoubleClick={() => setSaturation(APP_DEFAULTS.saturation)} className="w-full accent-yellow-500" />
               </div>
 
               <div className="pt-2 border-t border-white/5">
@@ -421,7 +489,7 @@ export default function App() {
                   <label className="text-xs text-gray-400">Target Hue</label>
                   <span className="text-xs font-mono text-gray-500">{targetHue.toFixed(isShiftPressed ? 1 : 0)}°</span>
                 </div>
-                <input type="range" min="0" max="360" step={isShiftPressed ? 0.1 : 1} value={targetHue} onChange={(e) => setTargetHue(parseFloat(e.target.value))} onDoubleClick={() => setTargetHue(0)} className="w-full" style={{ background: 'linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)', height: '4px', borderRadius: '2px', appearance: 'none', outline: 'none' }} />
+                <input type="range" min="0" max="360" step={isShiftPressed ? 0.1 : 1} value={targetHue} onChange={(e) => setTargetHue(parseFloat(e.target.value))} onDoubleClick={() => setTargetHue(APP_DEFAULTS.targetHue)} className="w-full" style={{ background: 'linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)', height: '4px', borderRadius: '2px', appearance: 'none', outline: 'none' }} />
               </div>
 
               <div>
@@ -429,7 +497,7 @@ export default function App() {
                   <label className="text-xs text-gray-400">Color Range</label>
                   <span className="text-xs font-mono text-gray-500">{colorRange === 1.0 ? 'All' : `${(colorRange * 100).toFixed(0)}%`}</span>
                 </div>
-                <input type="range" min="0.05" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={colorRange} onChange={(e) => setColorRange(parseFloat(e.target.value))} onDoubleClick={() => setColorRange(1.0)} className="w-full accent-yellow-500" />
+                <input type="range" min="0.05" max="1.0" step={isShiftPressed ? 0.01 : 0.05} value={colorRange} onChange={(e) => setColorRange(parseFloat(e.target.value))} onDoubleClick={() => setColorRange(APP_DEFAULTS.colorRange)} className="w-full accent-yellow-500" />
               </div>
             </div>
 
@@ -442,7 +510,7 @@ export default function App() {
                   <label className="text-xs text-gray-400">Halation</label>
                   <span className="text-xs font-mono text-gray-500">{(halation * 100).toFixed(0)}%</span>
                 </div>
-                <input type="range" min="0" max="1.0" step={isShiftPressed ? 0.002 : 0.01} value={halation} onChange={(e) => setHalation(parseFloat(e.target.value))} onDoubleClick={() => setHalation(0.2)} className="w-full accent-yellow-500" />
+                <input type="range" min="0" max="1.0" step={isShiftPressed ? 0.002 : 0.01} value={halation} onChange={(e) => setHalation(parseFloat(e.target.value))} onDoubleClick={() => setHalation(APP_DEFAULTS.halation)} className="w-full accent-yellow-500" />
               </div>
 
               <div>
@@ -450,7 +518,7 @@ export default function App() {
                   <label className="text-xs text-gray-400">Lens Vignette</label>
                   <span className="text-xs font-mono text-gray-500">{(vignette * 100).toFixed(0)}%</span>
                 </div>
-                <input type="range" min="0" max="1.0" step={isShiftPressed ? 0.002 : 0.01} value={vignette} onChange={(e) => setVignette(parseFloat(e.target.value))} onDoubleClick={() => setVignette(0.3)} className="w-full accent-yellow-500" />
+                <input type="range" min="0" max="1.0" step={isShiftPressed ? 0.002 : 0.01} value={vignette} onChange={(e) => setVignette(parseFloat(e.target.value))} onDoubleClick={() => setVignette(APP_DEFAULTS.vignette)} className="w-full accent-yellow-500" />
               </div>
             </div>
 
@@ -463,7 +531,7 @@ export default function App() {
                   <label className="text-xs text-gray-400">Amount</label>
                   <span className="text-xs font-mono text-gray-500">{(grainAmount * 100).toFixed(0)}%</span>
                 </div>
-                <input type="range" min="0" max="1.0" step={isShiftPressed ? 0.002 : 0.01} value={grainAmount} onChange={(e) => setGrainAmount(parseFloat(e.target.value))} onDoubleClick={() => setGrainAmount(0.15)} className="w-full accent-yellow-500" />
+                <input type="range" min="0" max="1.0" step={isShiftPressed ? 0.002 : 0.01} value={grainAmount} onChange={(e) => setGrainAmount(parseFloat(e.target.value))} onDoubleClick={() => setGrainAmount(APP_DEFAULTS.grainAmount)} className="w-full accent-yellow-500" />
               </div>
 
               <div>
@@ -471,7 +539,19 @@ export default function App() {
                   <label className="text-xs text-gray-400">Crystal Size</label>
                   <span className="text-xs font-mono text-gray-500">{grainSize.toFixed(1)}</span>
                 </div>
-                <input type="range" min="0.5" max="6.0" step={isShiftPressed ? 0.02 : 0.1} value={grainSize} onChange={(e) => setGrainSize(parseFloat(e.target.value))} onDoubleClick={() => setGrainSize(1.5)} className="w-full accent-yellow-500" />
+                <input type="range" min="0.5" max="6.0" step={isShiftPressed ? 0.02 : 0.1} value={grainSize} onChange={(e) => setGrainSize(parseFloat(e.target.value))} onDoubleClick={() => setGrainSize(APP_DEFAULTS.grainSize)} className="w-full accent-yellow-500" />
+                <div className="flex items-center justify-between mt-3">
+                  <label className="text-xs text-gray-400">Normalized Scale</label>
+                  <button
+                    onClick={() => setNormalizeGrain(!normalizeGrain)}
+                    className={`w-8 h-4 rounded-full transition-colors relative ${normalizeGrain ? 'bg-yellow-500' : 'bg-white/20'}`}
+                  >
+                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${normalizeGrain ? 'translate-x-4' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+                <p className="text-[10px] text-gray-500 mt-1.5 leading-tight">
+                  When ON, grain size looks identical regardless of image resolution. When OFF, grain size is absolute to raw pixels.
+                </p>
               </div>
             </div>
 
@@ -503,6 +583,22 @@ export default function App() {
                   </div>
                 </li>
               </ul>
+            </div>
+
+            {/* SETTINGS CONTROLS */}
+            <div className="mt-4 flex gap-2">
+              <button 
+                onClick={handleSaveDefaults}
+                className="flex-1 px-3 py-2 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white rounded-lg text-xs font-medium transition-colors text-center border border-white/5"
+              >
+                Save as Default
+              </button>
+              <button 
+                onClick={handleResetAppDefaults}
+                className="flex-1 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg text-xs font-medium transition-colors text-center border border-red-500/10"
+              >
+                Reset All
+              </button>
             </div>
 
           </div>
