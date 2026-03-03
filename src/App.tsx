@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Download, SlidersHorizontal, Image as ImageIcon, Camera, Eye, Plus, Minus, Keyboard } from 'lucide-react';
+import { Upload, Download, SlidersHorizontal, Image as ImageIcon, Camera, Eye, Plus, Minus, Keyboard, Github, Instagram } from 'lucide-react';
 import { WebGLCanvas } from './components/WebGLCanvas';
 
 const FILMS = [
@@ -599,6 +599,28 @@ export default function App() {
               >
                 Reset All
               </button>
+            </div>
+
+            {/* FOOTER LINKS */}
+            <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-center gap-6">
+              <a 
+                href="https://github.com/escaroda/filmlab" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-white transition-colors flex items-center gap-2 text-xs"
+              >
+                <Github className="w-4 h-4" />
+                GitHub
+              </a>
+              <a 
+                href="https://www.instagram.com/callsomeoneyoulove/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-500 hover:text-white transition-colors flex items-center gap-2 text-xs"
+              >
+                <Instagram className="w-4 h-4" />
+                Instagram
+              </a>
             </div>
 
           </div>
